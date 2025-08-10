@@ -1,0 +1,42 @@
+name: CI
+
+on: ['push', 'pull_request']
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    name: 👷‍♂️ CI Vlang on ${{ matrix.os }}
+
+    timeout-minutes: 60
+
+    steps:
+      - name: 🚚 Chekout repository
+        uses: actions/checkout@v4
+
+      - name: Setup V
+        uses: siguici/setup-v@1
+        with:
+          cwd: packages/v-project
+          path: $HOME/v
+          install: true
+          version-file: .v-version
+          latest: true
+        
+      - name: Show Installed V version
+        run: v version
+
+      - name: Build stress
+        run: v -o stress -prod .
+      
+      - name: Run stress --help
+        run: |
+          if ["$RUNNER_OS" = "Windows"]; then
+            ./stress.exe --help
+          else
+            ./stress --help
+          fi
+        shell: bash
+

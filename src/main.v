@@ -10,6 +10,8 @@ fn parse_args() Config {
 	fp.version('0.1.0')
 	fp.description('Simple HTTP stress tester')
 
+	show_help := fp.bool('help', `h`, false, 'Show help message')
+
 	url := fp.string('url', `u`, '', 'Target URL (required)')
 	concurrency := fp.int('concurrency', `c`, 10, 'Number of concurrent workers')
 	duration_str := fp.string('duration', `d`, '10s', 'Test duration (e.g., 10s, 1m, 1m30s, 250ms)')
@@ -17,7 +19,17 @@ fn parse_args() Config {
 	mut body := fp.string('body', `b`, '', 'Request body literal (for POST method)')
 	body_file := fp.string('body-file', `f`, '', 'File path to load request body (for POST method)')
 
-	// Convertir duración a time.Duration
+	_ := fp.finalize() or {
+		eprintln(err)
+		println(fp.usage())
+		exit(1)
+	}
+
+	if show_help {
+		println(fp.usage())
+		exit(0)
+	}
+
 	dur := parse_duration(duration_str) or {
 		eprintln('Invalid duration format')
 		exit(1)
